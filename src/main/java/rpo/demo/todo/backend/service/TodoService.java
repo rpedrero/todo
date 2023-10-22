@@ -4,7 +4,7 @@ import lombok.NonNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import rpo.demo.todo.backend.repository.TodoRepository;
-import rpo.demo.todo.backend.domain.entity.Todo;
+import rpo.demo.todo.backend.entity.Todo;
 
 @Service
 public class TodoService {

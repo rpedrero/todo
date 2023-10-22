@@ -6,7 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import rpo.demo.todo.backend.domain.entity.Todo;
+import rpo.demo.todo.backend.entity.Todo;
 import rpo.demo.todo.backend.service.TodoService;
 
 @RequestMapping("/api/todo/")
