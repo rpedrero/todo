@@ -22,9 +22,9 @@ public class TodoController {
         this.todoService = todoService;
     }
 
-    @GetMapping(path = "")
+    @GetMapping
     public ResponseEntity<Iterable<Todo>> getAll() {
-        return new ResponseEntity<>(this.todoService.getAll(), HttpStatus.CREATED);
+        return new ResponseEntity<>(this.todoService.getAll(), HttpStatus.OK);
     }
 
     @GetMapping(path = "{id}")
@@ -38,14 +38,14 @@ public class TodoController {
         }
     }
 
-    @PostMapping
+    @PostMapping(consumes = "application/json", produces = "application/json")
     public ResponseEntity<Todo> create(@Valid @RequestBody final Todo todo) {
         this.todoService.addTodo(todo);
 
-        return new ResponseEntity<>(todo, HttpStatus.OK);
+        return new ResponseEntity<>(todo, HttpStatus.CREATED);
     }
 
-    @PatchMapping(path = "{id}", consumes = "application/json-patch+json")
+    @PatchMapping(path = "{id}", consumes = "application/json-patch+json", produces = "application/json")
     public ResponseEntity<Todo> update(@PathVariable final Long id, @RequestBody final Todo todo) {
         Todo todoToBeEdited;
 

@@ -4,29 +4,44 @@ import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.http.HttpStatusCode;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import rpo.demo.todo.backend.entity.Todo;
 import rpo.demo.todo.backend.exception.TodoNotFoundException;
 import rpo.demo.todo.backend.service.TodoService;
+import rpo.demo.todo.backend.util.JsonUtil;
+import rpo.demo.todo.backend.util.JsonUtilImpl;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@ExtendWith(MockitoExtension.class)
+@WebMvcTest
+@ExtendWith({MockitoExtension.class})
+@Import(JsonUtilImpl.class)
 public class TodoControllerTests {
-    @Mock
+    @MockBean
     private TodoService todoService;
 
-    @InjectMocks
+    @Autowired
     private TodoController todoController;
+
+    @Autowired
+    private MockMvc mvc;
+
+    @Autowired
+    private JsonUtil jsonUtil;
 
     private Map<Long, Todo> todos;
 
@@ -54,25 +69,28 @@ public class TodoControllerTests {
     }
 
     @Test
-    public void getAllTest() {
+    public void getAllTest() throws Exception {
         when(todoService.getAll()).thenReturn(todos.values());
 
         ResponseEntity<Iterable<Todo>> results = this.todoController.getAll();
 
         Assertions.assertThat(results.getBody()).isNotNull();
 
-        int nbItemsInBody = 0;
-        for(Todo todo : results.getBody()) {
-            Assertions.assertThat(todo.getTitle()).isEqualTo(this.todos.get(todo.getId()).getTitle());
-            Assertions.assertThat(todo.getStatus()).isEqualTo(this.todos.get(todo.getId()).getStatus());
+        MockHttpServletResponse response = mvc.perform(MockMvcRequestBuilders
+                .get("/api/todo/")
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andReturn()
+                .getResponse();
 
-            nbItemsInBody++;
-        }
-        Assertions.assertThat(nbItemsInBody).isEqualTo(this.todos.size());
+        String todosListAsJson = this.jsonUtil.objectToJson(this.todos.values());
+        String receivedResponseAsJson = response.getContentAsString();
+
+        Assertions.assertThat(receivedResponseAsJson).isEqualTo(todosListAsJson);
     }
 
     @Test
-    public void getTest() {
+    public void getTest() throws Exception {
         when(this.todoService.getTodo(any(Long.class))).thenAnswer(invocation -> {
             Long argument = (Long) invocation.getArguments()[0];
 
@@ -85,20 +103,67 @@ public class TodoControllerTests {
         });
 
         for(long i = 1L; i <= 3L; i++) {
-            ResponseEntity<Todo> response = this.todoController.get(i);
+            MockHttpServletResponse response = mvc.perform(MockMvcRequestBuilders
+                    .get("/api/todo/" + i)
+                    .accept(MediaType.APPLICATION_JSON))
+                    .andExpect(status().isOk())
+                    .andReturn()
+                    .getResponse();
 
-            Assertions.assertThat(response.getBody()).isNotNull();
+            String todoAsAString = this.jsonUtil.objectToJson(this.todos.get(i));
 
-            Todo todo = response.getBody();
-            Assertions.assertThat(todo.getId()).isEqualTo(i);
-            Assertions.assertThat(todo.getTitle()).isEqualTo(this.todos.get(i).getTitle());
-            Assertions.assertThat(todo.getStatus()).isEqualTo(this.todos.get(i).getStatus());
+            Assertions.assertThat(response.getContentAsString()).isEqualTo(todoAsAString);
         }
 
-        ResponseEntity<Todo> responseForUnexistingTodoId = this.todoController.get(4L);
+        MockHttpServletResponse responseForUnexistingTodoId = mvc.perform(MockMvcRequestBuilders
+                    .get("/api/todo/4")
+                    .accept(MediaType.APPLICATION_JSON))
+                    .andExpect(status().isNotFound())
+                    .andReturn()
+                    .getResponse();
+    }
 
-        Assertions.assertThat(responseForUnexistingTodoId.getBody()).isNull();
-        Assertions.assertThat(responseForUnexistingTodoId.getStatusCode()).isEqualTo(HttpStatusCode.valueOf(404));
+    @Test
+    public void addTest() throws Exception {
+        when(this.todoService.getTodo(any(Long.class))).thenAnswer(invocation -> {
+            Long argument = (Long) invocation.getArguments()[0];
+
+            if (this.todos.containsKey(argument)) {
+                return this.todos.get(argument);
+            } else {
+                throw new TodoNotFoundException();
+            }
+        });
+
+        Todo newTodo = new Todo();
+        newTodo.setStatus(true);
+        newTodo.setTitle("New Todo");
+
+        String newTodoAsAString = this.jsonUtil.objectToJson(newTodo);
+
+        MockHttpServletResponse response = mvc.perform(MockMvcRequestBuilders.post("/api/todo/")
+                        .contentType("application/json")
+                        .content(newTodoAsAString)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isCreated())
+                .andReturn()
+                .getResponse();
+
+        Assertions.assertThat(response.getContentAsString()).isEqualTo(newTodoAsAString);
+
+        Todo incorrectTodo = new Todo();
+        incorrectTodo.setStatus(true);
+        incorrectTodo.setTitle("   ");
+
+        String incorrectTodoAsAString = this.jsonUtil.objectToJson(incorrectTodo);
+
+        MockHttpServletResponse responseForIncorrectTodo = mvc.perform(MockMvcRequestBuilders.post("/api/todo/")
+                        .contentType("application/json")
+                        .content(incorrectTodoAsAString)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest())
+                .andReturn()
+                .getResponse();
     }
 
     @Test
