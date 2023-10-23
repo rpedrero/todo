@@ -31,22 +31,22 @@ public class TodoRepositoryTests {
         todo1 = new Todo();
         todo1.setTitle("First todo");
         todo1.setStatus(true);
-        todo1 = todoRepository.save(todo1);
+        todoRepository.save(todo1);
 
         todo2 = new Todo();
         todo2.setTitle("Second todo");
         todo2.setStatus(false);
-        todo2 = todoRepository.save(todo2);
+        todoRepository.save(todo2);
 
         todo3 = new Todo();
         todo3.setTitle("Third todo");
         todo3.setStatus(false);
-        todo3 = todoRepository.save(todo3);
+        todoRepository.save(todo3);
 
         todo4 = new Todo();
         todo4.setTitle("Fourth todo");
         todo4.setStatus(true);
-        todo4 = todoRepository.save(todo4);
+        todoRepository.save(todo4);
     }
 
     @Test

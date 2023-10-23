@@ -46,11 +46,9 @@ public class TodoController {
         }
 
         try {
-            this.todoService.updateTodo(todoToBeEdited);
+            return new ResponseEntity<>(this.todoService.updateTodo(todoToBeEdited), HttpStatus.OK);
         } catch(Exception e) {
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
-
-        return new ResponseEntity<>(todoToBeEdited, HttpStatus.OK);
     }
 }

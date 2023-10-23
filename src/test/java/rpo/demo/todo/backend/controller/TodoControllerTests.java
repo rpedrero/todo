@@ -14,6 +14,7 @@ import rpo.demo.todo.backend.service.TodoService;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -28,7 +29,7 @@ public class TodoControllerTests {
 
     @BeforeEach
     public void init() {
-        List<Todo> todos = new ArrayList<>();
+        todos = new ArrayList<>();
 
         Todo todo1 = new Todo();
         todo1.setId(1L);
@@ -47,12 +48,12 @@ public class TodoControllerTests {
         todo3.setTitle("Todo 3");
         todo3.setStatus(true);
         todos.add(todo3);
-
-        when(todoService.getAll()).thenReturn(todos);
     }
 
     @Test
     public void getAllTest() {
+        when(todoService.getAll()).thenReturn(todos);
+
         ResponseEntity<Iterable<Todo>> results = this.todoController.getAll();
 
         for(Todo todo : results.getBody()) {
@@ -71,5 +72,31 @@ public class TodoControllerTests {
                 Assertions.fail("At least one item should not be part of the response.");
             }
         }
+    }
+
+    @Test
+    public void updateTest() {
+        Todo todo = new Todo();
+        todo.setStatus(true);
+
+        when(this.todoService.getTodo(any(Long.class))).thenReturn(this.todos.get(1));
+
+        when(this.todoService.updateTodo(any(Todo.class))).thenAnswer(invocation -> {
+            Object[] args = invocation.getArguments();
+            Todo arg = ((Todo) args[0]);
+
+            Todo entityToModify = this.todos.get(1);
+            entityToModify.setStatus(arg.getStatus());
+            entityToModify.setTitle(arg.getTitle());
+
+            return entityToModify;
+        });
+
+        ResponseEntity<Todo> response = this.todoController.update(2L, todo);
+
+        Assertions.assertThat(response.getBody()).isNotNull();
+        Assertions.assertThat(response.getBody().getId()).isEqualTo(2L);
+        Assertions.assertThat(response.getBody().getStatus()).isTrue();
+        Assertions.assertThat(response.getBody().getTitle()).isEqualTo("Todo 2");
     }
 }
