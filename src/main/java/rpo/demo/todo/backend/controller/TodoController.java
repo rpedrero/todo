@@ -22,6 +22,15 @@ public class TodoController {
         return new ResponseEntity<>(this.todoService.getAll(), HttpStatus.CREATED);
     }
 
+    @GetMapping("{id}")
+    public ResponseEntity<Todo> get(@PathVariable final Long id) {
+        try {
+            return new ResponseEntity<>(this.todoService.getTodo(id), HttpStatus.NOT_MODIFIED);
+        } catch(TodoNotFoundException e) {
+            return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
+        }
+    }
+
     @PatchMapping(path = "{id}", consumes = "application/json-patch+json")
     public ResponseEntity<Todo> update(@PathVariable final Long id, @RequestBody final Todo todo) {
         Todo todoToBeEdited;
