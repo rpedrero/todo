@@ -1,5 +1,6 @@
 package rpo.demo.todo.backend.service;
 
+import jakarta.validation.Valid;
 import lombok.NonNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -21,19 +22,19 @@ public class TodoServiceImpl implements TodoService {
     }
 
     @Override
-    public Long addTodo(@NonNull final Todo todo) {
+    public Long addTodo(@Valid @NonNull final Todo todo) {
         this.todoRepository.save(todo);
 
         return todo.getId();
     }
 
     @Override
-    public Todo getTodo(final Long id) {
+    public Todo getTodo(final Long id) throws TodoNotFoundException {
         return this.todoRepository.findById(id).orElseThrow(TodoNotFoundException::new);
     }
 
     @Override
-    public Todo updateTodo(final Todo todo) {
+    public Todo updateTodo(@Valid @NonNull final Todo todo) {
         return this.todoRepository.save(todo);
     }
 }
