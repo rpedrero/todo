@@ -17,10 +17,15 @@ public class Todo {
     @Id
     @GeneratedValue
     private Long id;
+
     @Column(nullable = false)
     private Boolean status;
+
     @NotEmpty
     @NotBlank
     @Column(nullable = false)
     private String title;
+
+    @Column(nullable = true)
+    private String description;
 }

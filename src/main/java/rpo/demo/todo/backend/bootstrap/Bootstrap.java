@@ -20,18 +20,21 @@ public class Bootstrap implements CommandLineRunner {
     public void run(String... args) throws Exception {
         final Todo todo1 = new Todo();
         todo1.setTitle("Write a specifications document");
+        todo1.setDescription("A specifications document is required so the developers understand what they're expected to do.");
         todo1.setStatus(true);
         this.todoService.addTodo(todo1);
         log.debug("First todo created.");
 
         final Todo todo2 = new Todo();
         todo2.setTitle("Develop features");
+        todo2.setDescription("Developers has to develop what they're asked to develop");
         todo2.setStatus(false);
         this.todoService.addTodo(todo2);
         log.debug("Second todo created.");
 
         final Todo todo3 = new Todo();
         todo3.setTitle("Perform functional tests");
+        todo3.setDescription("Testing is doubting!");
         todo3.setStatus(false);
         this.todoService.addTodo(todo3);
         log.debug("Third todo created.");
