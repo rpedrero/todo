@@ -13,7 +13,7 @@ import rpo.demo.todo.backend.exception.TodoNotFoundException;
 import rpo.demo.todo.backend.service.TodoService;
 
 @Log4j2
-@RequestMapping("/api/todo/")
+@RequestMapping({"todo", "todo/"})
 @RestController
 public class TodoController {
     private final TodoService todoService;
@@ -22,12 +22,12 @@ public class TodoController {
         this.todoService = todoService;
     }
 
-    @GetMapping
+    @GetMapping(produces = "application/json")
     public ResponseEntity<Iterable<Todo>> getAll() {
         return new ResponseEntity<>(this.todoService.getAll(), HttpStatus.OK);
     }
 
-    @GetMapping(path = "{id}")
+    @GetMapping(path = {"{id}", "{id}/"}, produces = "application/json")
     public ResponseEntity<Todo> get(@PathVariable final Long id) {
         try {
             return new ResponseEntity<>(this.todoService.getTodo(id), HttpStatus.OK);
@@ -45,7 +45,7 @@ public class TodoController {
         return new ResponseEntity<>(todo, HttpStatus.CREATED);
     }
 
-    @PatchMapping(path = "{id}", consumes = "application/json-patch+json", produces = "application/json")
+    @PatchMapping(path = {"{id}", "{id}/"}, consumes = "application/json-patch+json", produces = "application/json")
     public ResponseEntity<Todo> update(@PathVariable final Long id, @RequestBody final Todo todo) {
         Todo todoToBeEdited;
 
