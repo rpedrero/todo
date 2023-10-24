@@ -11,11 +11,9 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @Configuration
 public class ApplicationConfiguration implements WebMvcConfigurer {
     private final String[] allowedCorsOrigins;
-    private final String baseUri;
 
-    public ApplicationConfiguration(@Value("${todo.front.clients}") final String[] allowedCorsOrigins, @Value("${server.servlet.context-path}") final String baseUri) {
+    public ApplicationConfiguration(@Value("${todo.front.clients}") final String[] allowedCorsOrigins) {
         this.allowedCorsOrigins = allowedCorsOrigins;
-        this.baseUri = baseUri;
     }
 
     @Bean
