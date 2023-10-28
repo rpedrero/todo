@@ -1,16 +1,16 @@
 package rpo.demo.todo.backend.controller;
 
 import jakarta.validation.Valid;
-import jakarta.validation.Validation;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.ValidationUtils;
 import org.springframework.web.bind.annotation.*;
 import rpo.demo.todo.backend.entity.Todo;
 import rpo.demo.todo.backend.exception.TodoNotFoundException;
 import rpo.demo.todo.backend.service.TodoService;
+
+import java.time.LocalDateTime;
 
 @Log4j2
 @RequestMapping({"todo", "todo/"})
@@ -40,6 +40,8 @@ public class TodoController {
 
     @PostMapping(consumes = "application/json", produces = "application/json")
     public ResponseEntity<Todo> create(@Valid @RequestBody final Todo todo) {
+        todo.setDateDone((todo.getStatus() != null && todo.getStatus()) ? LocalDateTime.now() : null);
+
         this.todoService.addTodo(todo);
 
         return new ResponseEntity<>(todo, HttpStatus.CREATED);
@@ -68,8 +70,14 @@ public class TodoController {
             todoToBeEdited.setTitle(todo.getTitle());
         }
 
+        if(todo.getDescription() != null && !todo.getDescription().isEmpty()) {
+            todoToBeEdited.setDescription(todo.getDescription());
+        }
+
         if(todo.getStatus() != todoToBeEdited.getStatus()) {
             todoToBeEdited.setStatus(todo.getStatus());
+
+            todoToBeEdited.setDateDone((todo.getStatus()) ? LocalDateTime.now() : null);
         }
 
         try {

@@ -3,10 +3,11 @@ package rpo.demo.todo.backend.entity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+
+import java.time.LocalDateTime;
 
 @Getter
 @Setter
@@ -26,6 +27,9 @@ public class Todo {
     @Column(nullable = false)
     private String title;
 
-    @Column(nullable = true)
+    @Column
     private String description;
+
+    @Column
+    private LocalDateTime dateDone;
 }
